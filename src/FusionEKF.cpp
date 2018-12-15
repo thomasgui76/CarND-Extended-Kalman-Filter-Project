@@ -75,7 +75,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
+    ekf_.x_ << 1, 1, 0, 0;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       // TODO: Convert radar from polar to cartesian coordinates 
@@ -85,11 +85,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // float rhodot = measurement_pack.raw_measurements_[2];
       float px = rho * cos(phi);
       float py = rho * sin(phi);
-      ekf_.x_ << px,py,0,0;
+      ekf_.x_[0]=px;
+      ekf_.x_[1]=py;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // TODO: Initialize state.
-      ekf_.x_ << measurement_pack.raw_measurements_[0],measurement_pack.raw_measurements_[1],0,0;
+      // ekf_.x_ << measurement_pack.raw_measurements_[0],measurement_pack.raw_measurements_[1],0,0;
+      ekf_.x_[0]=measurement_pack.raw_measurements_[0];
+      ekf_.x_[1]=measurement_pack.raw_measurements_[1];
 
     }
 
@@ -116,9 +119,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   previous_timestamp_ = measurement_pack.timestamp_;
 
     // TODO: YOUR CODE HERE
-  float dt_2 = dt * dt;
-  float dt_3 = dt_2 * dt;
-  float dt_4 = dt_3 * dt;
+  double dt_2 = dt * dt;
+  double dt_3 = dt_2 * dt;
+  double dt_4 = dt_3 * dt;
 
   // Modify the F matrix so that the time is integrated
   ekf_.F_(0, 2) = dt;
@@ -152,19 +155,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.H_ = Hj_;
     ekf_.R_ = R_radar_;
-    VectorXd z(3);
-    z << measurement_pack.raw_measurements_[0],measurement_pack.raw_measurements_[1],
-    measurement_pack.raw_measurements_[2];
-    ekf_.Update(z);
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   }
 
   else {
     // TODO: Laser updates
     ekf_.H_ = H_laser_;
     ekf_.R_ = R_laser_;
-    VectorXd z(4);
-    z << measurement_pack.raw_measurements_[0],measurement_pack.raw_measurements_[1],0,0;
-    ekf_.Update(z);
+    ekf_.Update(measurement_pack.raw_measurements_);
   }
 
   // print the output
