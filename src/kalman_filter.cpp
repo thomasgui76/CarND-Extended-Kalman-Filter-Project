@@ -3,6 +3,10 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 /* 
  * Please note that the Eigen library does not initialize 
  *   VectorXd or MatrixXd objects with zeros upon creation.
@@ -49,7 +53,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
-
+  cout << "K = " << K << endl;
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -78,4 +82,5 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
+  cout << "K = " << K << endl;
 }
