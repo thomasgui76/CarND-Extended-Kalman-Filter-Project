@@ -3,6 +3,7 @@
 
 #include "Eigen/Dense"
 #include <math.h>
+#define PI acos(-1)
 
 class KalmanFilter {
  public:
